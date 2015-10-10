@@ -28,6 +28,10 @@ func Create(root string, when time.Time) error {
 
 //
 func Logit(root string, when time.Time, log string) error {
+	if err := Create(root, when); err != nil {
+		return err
+	}
+
 	logPath := path.Join(Rootpath(root, when), "log")
 	_, err := os.Stat(logPath)
 	newFile := false

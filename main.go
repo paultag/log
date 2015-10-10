@@ -38,7 +38,9 @@ func main() {
 		Listit(conf, when)
 		return
 	case "write":
-		Logit(conf.Root, when, strings.Join(flags.Args(), " "))
+		if err := Logit(conf.Root, when, strings.Join(flags.Args(), " ")); err != nil {
+			panic(err)
+		}
 		return
 	default:
 		Help()
