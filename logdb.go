@@ -23,7 +23,7 @@ func Create(root string, when time.Time) error {
 }
 
 //
-func Log(root string, when time.Time, log string) error {
+func Logit(root string, when time.Time, log string) error {
 	logPath := path.Join(Rootpath(root, when), "log")
 	_, err := os.Stat(logPath)
 	newFile := false
