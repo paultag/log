@@ -1,9 +1,13 @@
+//
+
 package main
 
 import (
 	"bufio"
+	"io"
 	"os"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -39,10 +43,10 @@ func Logit(root string, when time.Time, log string) error {
 	}
 
 	fd, err := os.OpenFile(logPath, os.O_RDWR|os.O_APPEND, 0600)
-	defer fd.Close()
 	if err != nil {
 		return err
 	}
+	defer fd.Close()
 	writer := bufio.NewWriter(fd)
 	if !newFile {
 		writer.Write([]byte{12, '\n'})
@@ -52,4 +56,27 @@ func Logit(root string, when time.Time, log string) error {
 	writer.Write([]byte("\n"))
 	writer.Flush()
 	return nil
+}
+
+//
+func Readit(root string, when time.Time) []string {
+	ret := []string{}
+
+	logPath := path.Join(Rootpath(root, when), "log")
+	fd, err := os.Open(logPath)
+	if err != nil {
+		return []string{}
+	}
+	defer fd.Close()
+
+	reader := bufio.NewReader(fd)
+	for {
+		line, err := reader.ReadString(byte(12))
+		ret = append(ret, strings.Trim(line, "\n\r \t\x0C"))
+		if err == io.EOF {
+			break
+		}
+	}
+
+	return ret
 }

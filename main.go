@@ -1,6 +1,9 @@
+//
+
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -9,29 +12,49 @@ import (
 )
 
 type Log struct {
-	Root string `flag:"root" description:"Log root"`
+	Root   string `flag:"root"   description:"Log root"`
+	When   string `flag:"when"   description:"When is it. In YYYY-MM-DD form"`
+	Action string `flag:"action" description:"action to take"`
 }
 
 func main() {
 	when := time.Now()
-
-	conf := Log{Root: "/tmp/log/"}
+	conf := Log{Root: "log/", Action: "write"}
 	flags, err := config.LoadFlags("log", &conf)
 	if err != nil {
 		panic(err)
 	}
 	flags.Parse(os.Args[1:])
 
-	args := flags.Args()
-	if len(args) == 0 {
-		panic("No message")
+	if conf.When != "" {
+		when, err = time.Parse("2006-01-02", conf.When)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	if err := Create(conf.Root, when); err != nil {
-		panic(err)
+	switch conf.Action {
+	case "ls":
+		Listit(conf, when)
+		return
+	case "write":
+		Logit(conf.Root, when, strings.Join(flags.Args(), " "))
+		return
+	default:
+		Help()
+		return
 	}
 
-	if err := Logit(conf.Root, when, strings.Join(args, " ")); err != nil {
-		panic(err)
+}
+
+func Listit(conf Log, when time.Time) {
+	fmt.Printf("%s\n", when.Format("*Mon, Jan 2, 2006*"))
+	blocks := Readit(conf.Root, when)
+	for _, block := range blocks {
+		fmt.Printf("  • %s\n", block)
 	}
+}
+
+func Help() {
+	fmt.Println("Commands: ls, write")
 }
