@@ -56,6 +56,10 @@ func main() {
 		Listit(conf, when)
 		return
 	case "write":
+		if len(flags.Args()) == 0 {
+			Listit(conf, when)
+			return
+		}
 		if err := Logit(conf.Root, when, strings.Join(flags.Args(), " ")); err != nil {
 			panic(err)
 		}
