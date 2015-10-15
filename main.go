@@ -45,9 +45,16 @@ func main() {
 	flags.Parse(os.Args[1:])
 
 	if conf.When != "" {
-		when, err = time.Parse("2006-01-02", conf.When)
+		nWhen, err := time.Parse("2006-01-02", conf.When)
 		if err != nil {
-			panic(err)
+			/* last ditch */
+			duration, err := time.ParseDuration(conf.When)
+			if err != nil {
+				panic(err)
+			}
+			when = when.Add(duration)
+		} else {
+			when = nWhen
 		}
 	}
 
